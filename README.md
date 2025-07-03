@@ -1,19 +1,18 @@
 # How to Train Your Dragon (LLM) for Product Recommendation
 
-In this post, we outline a practical approach for building a product recommendation system using Large Language Models (LLMs). We begin with our current method using Retrieval-Augmented Generation (RAG), identify its limitations, and then present a structured path toward training and evolving a more personalized recommender system using Reinforcement Learning from Human Interaction (RLHI).
+In this post, i have explained my approach for building a product recommendation system using Large Language Models (LLMs). We begin with our current method using Retrieval-Augmented Generation (RAG), identify its limitations, and then present a structured path toward training and evolving a more personalized recommender system using Reinforcement Learning from Human Interaction (RLHI).
 
 ---
 
 ## Current System: RAG with ChatGPT
 
-Our existing setup uses a RAG pipeline where ChatGPT (gpt-3.5-turbo) acts as a reasoning engine to score products retrieved from a vector database.
+my existing setup uses a RAG pipeline where ChatGPT (gpt-3.5-turbo) acts as a reasoning engine to score products retrieved from a vector database.
 
 ### Workflow
 
 **Data Sources**:
 - Product catalog
-- User preferences
-- Browsing history collected from the UI
+- User preferences and Browsing history collected from the UI
 
 **Vector Search**:
 - All product descriptions and recent user history are embedded.
@@ -46,18 +45,40 @@ Traditional recommender systems use collaborative filtering, clustering, or grap
 With LLMs, we can reframe recommendation as a sequence prediction or language modeling problem—treating browsing and purchase behavior as structured narratives. This opens the door for both zero-shot reasoning and continual adaptation.
 
 ---
+## Pipeline Overview
 
-## Dataset Preparation
-
-To train such a model, we created a structured dataset containing:
-
-- Product metadata
-- Simulated user sessions
-- Annotated preferences and edge cases
-
-Each record reflects the kind of decision ChatGPT would make in the current RAG system, forming the basis for supervised fine-tuning.
-
----
+```
+         +---------------------+
+         | Browsing History    |
+         +----------+----------+
+                    |
+                    v
+         +---------------------+
+         | LLM (Base or SFT)   |  <-- Initial supervised model
+         +----------+----------+
+                    |
+          Generate Recommendations
+                    |
+                    v
+         +---------------------+
+         | User Feedback Logs  |  <-- Hover, click, purchase, etc.
+         +----------+----------+
+                    |
+                    v
+         +---------------------+
+         | Reward Model (optional)     |
+         +----------+----------+
+                    |
+                    v
+         +---------------------+
+         | RLHF Fine-Tuning    |  <-- PPO or DPO
+         +----------+----------+
+                    |
+                    v
+         +---------------------+
+         | Updated Recommender |
+         +---------------------+
+```
 
 ## Supervised Training with Sequence Inputs
 
