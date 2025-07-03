@@ -120,13 +120,13 @@ Each action can be treated as an implicit signal of user intent. Strong signals 
 }
 ```
 
-As the model is fine-tuned using interaction-based rewards (via methods like PPO or DPO), it updates its policy to increase the likelihood of actions (recommendations) that lead to higher user engagement. Over many iterations:
+As the model is fine-tuned using interaction-based rewards (via methods like PPO or DPO), it updates its policy to increase the likelihood of actions (recommendations) that lead to higher user engagement. 
+Over many iterations:
+- Reward gradients guide the model toward output distributions that maximize expected user satisfaction.
 
-Reward gradients guide the model toward output distributions that maximize expected user satisfaction.
+- The policy shifts from general patterns learned during supervised pretraining to behavior aligned with real-world feedback.
 
-The policy shifts from general patterns learned during supervised pretraining to behavior aligned with real-world feedback.
-
-Negative rewards (e.g., from scroll-past or ignored items) reduce the probability of those recommendations in similar contexts.
+- Negative rewards (e.g., from scroll-past or ignored items) reduce the probability of those recommendations in similar contexts.
 
 
 ---
