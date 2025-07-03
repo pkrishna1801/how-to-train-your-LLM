@@ -1,6 +1,6 @@
 # How to Train Your Dragon (LLM) for Product Recommendation
 
-In this post, i have explained my approach for building a product recommendation system using Large Language Models (LLMs). We begin with our current method using Retrieval-Augmented Generation (RAG), identify its limitations, and then present a structured path toward training and evolving a more personalized recommender system using Reinforcement Learning from Human Interaction (RLHI).
+In this post, I will explained my approach for building a product recommendation system using Large Language Models (LLMs). We begin with our current method using Retrieval-Augmented Generation (RAG), identify its limitations, and then present a structured path toward training and evolving a more personalized recommender system using Reinforcement Learning from Human Interaction (RLHI).
 
 ---
 
@@ -22,7 +22,7 @@ my existing setup uses a RAG pipeline where ChatGPT (gpt-3.5-turbo) acts as a re
 - These products are passed to ChatGPT in a structured prompt.
 - ChatGPT returns relevance scores which are used to recommend the top-N products.
 
----
+
 
 ## Observed Limitations
 
@@ -30,11 +30,11 @@ my existing setup uses a RAG pipeline where ChatGPT (gpt-3.5-turbo) acts as a re
 2. **Lack of Diversity**: Over-specialization (e.g., viewing a monitor yields more monitors) with little exploration into complementary products.
 3. **Static Behavior**: No ability to learn from real-time feedback or user-level interactions.
 
----
+
 
 ## Why Move Beyond RAG?
 
-While the RAG+LLM approach is effective for general-purpose recommendations, it lacks adaptability. Training a task-specific model or lightweight LLM variant enables more fine-tuned behavior. But even supervised fine-tuning has limitations—it cannot efficiently adapt to new trends or individual user preferences over time.
+While the RAG+LLM approach is effective for general-purpose recommendations, it lacks adaptability. Training a task-specific model or lightweight LLM variant enables more fine-tuned behavior. But even supervised fine-tuning has limitations. It cannot efficiently adapt to new trends or individual user preferences over time.
 
 ---
 
@@ -44,7 +44,6 @@ Traditional recommender systems use collaborative filtering, clustering, or grap
 
 With LLMs, we can reframe recommendation as a sequence prediction or language modeling problem—treating browsing and purchase behavior as structured narratives. This opens the door for both zero-shot reasoning and continual adaptation.
 
----
 ## Pipeline Overview
 
 ```
@@ -114,10 +113,13 @@ Each action can be treated as an implicit signal of user intent. Strong signals 
 
 ```json
 {
+  "user_id": "user_123",
+  "session_id": "user_123_123",
   "user_browsing_history": ["prod_21", "prod_13", "prod_09"],
   "llm_recommendations": ["prod_31", "prod_45", "prod_57"],
   "user_action": "clicked prod_45"
 }
+
 ```
 
 As the model is fine-tuned using interaction-based rewards (via methods like PPO or DPO), it updates its policy to increase the likelihood of actions (recommendations) that lead to higher user engagement. 
@@ -127,9 +129,6 @@ Over many iterations:
 - The policy shifts from general patterns learned during supervised pretraining to behavior aligned with real-world feedback.
 
 - Negative rewards (e.g., from scroll-past or ignored items) reduce the probability of those recommendations in similar contexts.
-
-
----
 
 ## Why RLHI Works Better Than Just Fine-Tuning
 
