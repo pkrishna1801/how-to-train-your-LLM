@@ -79,6 +79,8 @@ With LLMs, we can reframe recommendation as a sequence prediction or language mo
          | Updated Recommender |
          +---------------------+
 ```
+The pipeline starts with the user’s browsing history as input to a base or fine-tuned language model, which generates product recommendations. As users interact—click, hover, purchase, or scroll past—these actions are logged as feedback. A reward model (or simple heuristics) assigns value to these interactions. Using this reward signal, the model is fine-tuned with methods like PPO or DPO to better align with user preferences. This updated model is then redeployed, creating a feedback loop that enables real-time personalization and continuous improvement.
+
 
 ## Supervised Training with Sequence Inputs
 
@@ -97,6 +99,18 @@ Such sequences can be used to fine-tune a base transformer using standard superv
 
 To personalize and adapt over time, we move beyond supervised learning. RLHI allows the model to improve using real user interactions as feedback.
 
+These interactions include:
+
+- Click
+- Hover
+- Scroll past
+- Add to cart
+- Remove from cart
+- Purchase
+- Review after purchase
+
+Each action can be treated as an implicit signal of user intent. Strong signals like purchases or reviews can reinforce useful recommendations, while clicks and hovers offer fine-grained feedback.
+
 ### Example Interaction Log
 
 ```json
@@ -107,23 +121,7 @@ To personalize and adapt over time, we move beyond supervised learning. RLHI all
 }
 ```
 
-These logs can serve as a reward signal, allowing the model to update based on implicit preferences.
-
----
-
-## Types of User Feedback Used
-
-We leverage various user interactions to model engagement and intent:
-
-- Click
-- Hover
-- Scroll past
-- Add to cart
-- Remove from cart
-- Purchase
-- Review after purchase
-
-These actions can be assigned implicit or learned reward values. Strong signals like purchases and reviews help correct the model, while clicks and hovers refine preferences.
+Such logs can serve as reward signals for fine-tuning, allowing the model to learn user preferences in real time.
 
 ---
 
@@ -135,43 +133,6 @@ Supervised fine-tuning captures general trends across many users, but:
 - It becomes outdated as product catalogs or trends change.
 
 RLHI, on the other hand, enables dynamic, user-specific adaptation—allowing the system to evolve with every interaction.
-
----
-
-## RLHF Pipeline Overview
-
-```
-         +---------------------+
-         | Browsing History    |
-         +----------+----------+
-                    |
-                    v
-         +---------------------+
-         | LLM (Base or SFT)   |  <-- Initial supervised model
-         +----------+----------+
-                    |
-          Generate Recommendations
-                    |
-                    v
-         +---------------------+
-         | User Feedback Logs  |  <-- Hover, click, purchase, etc.
-         +----------+----------+
-                    |
-                    v
-         +---------------------+
-         | Reward Model (optional)     |
-         +----------+----------+
-                    |
-                    v
-         +---------------------+
-         | RLHF Fine-Tuning    |  <-- PPO or DPO
-         +----------+----------+
-                    |
-                    v
-         +---------------------+
-         | Updated Recommender |
-         +---------------------+
-```
 
 ---
 
