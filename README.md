@@ -42,7 +42,7 @@ While the RAG+LLM approach is effective for general-purpose recommendations, it 
 
 Traditional recommender systems use collaborative filtering, clustering, or graph-based methods. While effective at scale, they often miss nuance in user behavior.
 
-With LLMs, we can reframe recommendation as a sequence prediction or language modeling problem—treating browsing and purchase behavior as structured narratives. This opens the door for both zero-shot reasoning and continual adaptation.
+With LLMs, we can reframe recommendation as a sequence prediction or language modeling problem, treating browsing and purchase behavior as structured narratives. This opens the door for both zero-shot reasoning and continual adaptation.
 
 ## Pipeline Overview
 
