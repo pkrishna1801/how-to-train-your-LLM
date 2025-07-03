@@ -1,63 +1,57 @@
-How to Train Your Dragon (LLM) for Product Recommendation
+# How to Train Your Dragon (LLM) for Product Recommendation
+
 In this post, I explain our current method for building a product recommendation system using Large Language Models (LLMs), the limitations we’ve encountered, and a proposed direction for training a smaller model that can improve performance over time.
 
-Current Approach: RAG with ChatGPT Wrapper
+## Current Approach: RAG with ChatGPT Wrapper
+
 Our existing solution is built using a Retrieval-Augmented Generation (RAG) approach, where the main idea is to use ChatGPT (gpt-3.5-turbo) as a reasoning wrapper rather than training it directly.
 
-How It Works
-Data Sources:
+### How It Works
 
-Product dataset: A list of available products.
+**Data Sources:**
+- Product dataset: A list of available products.
+- User preferences: Provided separately.
+- Browsing history: Collected from the React-based UI.
 
-User preferences: Provided separately.
+**Vector Search:**
+- All product descriptions are embedded and stored in a vector database (we use FAISS).
+- The user’s most recent browsing history is also embedded.
+- We retrieve the top-K nearest products from the vector database based on this embedding.
 
-Browsing history: Collected from the React-based UI.
+**Relevance Scoring:**
+- These top-K products are sent to ChatGPT with a structured prompt.
+- ChatGPT returns a relevance score for each item.
+- We sort and fetch the top-N products based on these scores and recommend them to the user.
 
-Vector Search:
+## Limitations
 
-All product descriptions are embedded and stored in a vector database (we use FAISS).
-
-The user’s most recent browsing history is also embedded.
-
-We retrieve the top-K nearest products from the vector database based on this embedding.
-
-Relevance Scoring:
-
-These top-K products are sent to ChatGPT with a structured prompt.
-
-ChatGPT returns a relevance score for each item.
-
-We sort and fetch the top-N products based on these scores and recommend them to the user.
-
-Limitations
 While this approach works to some extent, it has a few important drawbacks:
 
-Cold Start Problem: If a user has no or very little browsing history, recommendations become unreliable.
+- **Cold Start Problem:** If a user has no or very little browsing history, recommendations become unreliable.
+- **Lack of Diversity:** For example, if the browsing history contains a monitor, the system tends to recommend only similar items (more monitors). In many cases, suggesting related accessories like keyboards or mouse devices would be more effective.
 
-Lack of Diversity: For example, if the browsing history contains a monitor, the system tends to recommend only similar items (more monitors). In many cases, suggesting related accessories like keyboards or mouse devices would be more effective.
+## Why Train a Model?
 
-Why Train a Model?
 Instead of using ChatGPT solely as a wrapper, training a dedicated model can yield better performance. A model fine-tuned on our dataset can learn user behavior patterns more effectively and provide diverse recommendations based on both browsing history and general trends.
 
-Dataset Preparation
+## Dataset Preparation
+
 The quality and structure of the dataset play a critical role in building a successful recommendation system. Most existing solutions rely heavily on the structure of the data. To move forward, I have created a dataset that includes:
 
-Product metadata.
-
-Simulated browsing histories.
-
-Annotated preferred recommendations (including edge cases and anomalies).
+- Product metadata.
+- Simulated browsing histories.
+- Annotated preferred recommendations (including edge cases and anomalies).
 
 This dataset mirrors the decisions made by ChatGPT in our current pipeline. The goal is to train a smaller model using this data in a teacher-student setup, where ChatGPT serves as the teacher.
 
-Towards an Online Learning System
+## Towards an Online Learning System
+
 Once we have a trained model, we can improve it over time using Reinforcement Learning with Human Feedback (RLHF) or simplified forms of it. As users interact more with the system, the model can be updated regularly to:
 
-Reflect shifting user preferences.
+- Reflect shifting user preferences.
+- Incorporate newly added products.
+- Handle unusual or unexpected behavior patterns more effectively.
 
-Incorporate newly added products.
+## Summary
 
-Handle unusual or unexpected behavior patterns more effectively.
-
-Summary
 While LLM-based wrappers can generate decent results using prompt engineering, training a dedicated model can lead to more flexible and personalized product recommendations. Using a carefully structured dataset, even a small model can be trained to replicate and eventually outperform our current wrapper-based method. This also opens the door to integrating feedback loops and online learning for continuous improvement.
