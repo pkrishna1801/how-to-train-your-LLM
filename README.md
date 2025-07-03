@@ -1,83 +1,161 @@
+# How to Train Your Dragon (LLM) for Product Recommendation
 
-In this post, I explain my previous approach for building a product recommendation system using Large Language Models (LLMs), the limitations encountered, and a proposed direction for training a smaller model that can improve performance over time.
+In this post, we outline a practical approach for building a product recommendation system using Large Language Models (LLMs). We begin with our current method using Retrieval-Augmented Generation (RAG), identify its limitations, and then present a structured path toward training and evolving a more personalized recommender system using Reinforcement Learning from Human Interaction (RLHI).
 
 ---
 
-## Old Approach: RAG with ChatGPT Wrapper
+## Current System: RAG with ChatGPT
 
-Our existing solution is built using a Retrieval-Augmented Generation (RAG) approach, where the main idea is to use ChatGPT (gpt-3.5-turbo) as a reasoning wrapper rather than training it directly.
+Our existing setup uses a RAG pipeline where ChatGPT (gpt-3.5-turbo) acts as a reasoning engine to score products retrieved from a vector database.
 
-### How It Works
+### Workflow
 
 **Data Sources**:
-- **Product dataset**: A list of available products.
-- **User preferences**: Provided separately.
-- **Browsing history**: Collected from the React-based UI.
+- Product catalog
+- User preferences
+- Browsing history collected from the UI
 
 **Vector Search**:
-- All product descriptions are embedded and stored in a vector database (I use FAISS).
-- The user’s most recent browsing history is also embedded.
-- We retrieve the top-K nearest products from the vector database based on this embedding.
+- All product descriptions and recent user history are embedded.
+- The top-K similar products are retrieved using FAISS.
 
 **Relevance Scoring**:
-- These top-K products are sent to ChatGPT with a structured prompt.
-- ChatGPT returns a relevance score for each item.
-- We sort and fetch the top-N products based on these scores and recommend them to the user.
+- These products are passed to ChatGPT in a structured prompt.
+- ChatGPT returns relevance scores which are used to recommend the top-N products.
 
 ---
 
-## Limitations
+## Observed Limitations
 
-While this approach works to some extent, it has a few important drawbacks:
-
-- **Cold Start Problem**: If a user has no or very little browsing history, recommendations become unreliable.
-- **Lack of Diversity**: For example, if the browsing history contains a monitor, the system tends to recommend only similar items (more monitors). In many cases, suggesting related accessories like keyboards or mouse devices would be more effective.
+1. **Cold Start Problem**: Sparse or missing browsing history leads to unreliable recommendations.
+2. **Lack of Diversity**: Over-specialization (e.g., viewing a monitor yields more monitors) with little exploration into complementary products.
+3. **Static Behavior**: No ability to learn from real-time feedback or user-level interactions.
 
 ---
 
-## Why Train a Model?
+## Why Move Beyond RAG?
 
-Instead of using ChatGPT solely as a wrapper, training a dedicated model can yield better performance. A model fine-tuned on our dataset can learn user behavior patterns more effectively and provide diverse recommendations based on both browsing history and general trends.
+While the RAG+LLM approach is effective for general-purpose recommendations, it lacks adaptability. Training a task-specific model or lightweight LLM variant enables more fine-tuned behavior. But even supervised fine-tuning has limitations—it cannot efficiently adapt to new trends or individual user preferences over time.
+
+---
 
 ## Background
 
-There are many machine learning models available for clustering all the products and making recommendations, but in this post, I will focus on how Large Language Models (LLMs) can be used for product recommendation—particularly how we’ve adapted them for personalized suggestions based on user behavior
+Traditional recommender systems use collaborative filtering, clustering, or graph-based methods. While effective at scale, they often miss nuance in user behavior.
 
-## Alternative Training Approaches Based on Dataset
+With LLMs, we can reframe recommendation as a sequence prediction or language modeling problem—treating browsing and purchase behavior as structured narratives. This opens the door for both zero-shot reasoning and continual adaptation.
 
-There are many approaches we can take, depending on the kind of dataset we have. For example, if we have data with `user_id`, `last_viewed`, `last_add_to_cart`, and `last_purchased` items, we can fine-tune an LLM for next-product recommendation using supervised learning.
+---
 
-**Example Input-Output Pair**:
+## Dataset Preparation
+
+To train such a model, we created a structured dataset containing:
+
+- Product metadata
+- Simulated user sessions
+- Annotated preferences and edge cases
+
+Each record reflects the kind of decision ChatGPT would make in the current RAG system, forming the basis for supervised fine-tuning.
+
+---
+
+## Supervised Training with Sequence Inputs
+
+If the dataset contains user sessions with clear transitions from view to cart to purchase, we can train a model with simple input-output patterns like:
+
 ```
-Input: “User viewed prod1, prod2, added prod5, purchased prod6”  
-Output: “Recommend: prod8, prod9”
+Input: "User viewed prod1, prod2, added prod5, purchased prod6"  
+Output: "Recommend: prod8, prod9"
 ```
 
-Any transformer or LLM can be fine-tuned on this data using supervised learning. With enough training samples, the model can learn strong recommendation capabilities.
+Such sequences can be used to fine-tune a base transformer using standard supervised objectives.
 
-### Reinforcement Learning from Human Interaction (RLHI)
+---
 
-Once the model is deployed, we can refine it using RLHI. Whenever a product is actually purchased or clicked by the user, this interaction can act as a **reward signal**.
+## Reinforcement Learning from Human Interaction (RLHI)
 
-You're capturing real intent through user actions—which is more reliable than any synthetic reward.
+To personalize and adapt over time, we move beyond supervised learning. RLHI allows the model to improve using real user interactions as feedback.
 
-**Example JSON format**:
+### Example Interaction Log
+
 ```json
 {
-  "user_browsing_history": "['prod_21', 'prod_13', 'prod_09']",
-  "llm_recommendations": "['prod_31', 'prod_45', 'prod_57']",
+  "user_browsing_history": ["prod_21", "prod_13", "prod_09"],
+  "llm_recommendations": ["prod_31", "prod_45", "prod_57"],
   "user_action": "clicked prod_45"
 }
 ```
 
-These interactions can be used to continuously fine-tune the model and personalize recommendations further.
+These logs can serve as a reward signal, allowing the model to update based on implicit preferences.
 
 ---
 
-## Towards an Online Learning System
+## Types of User Feedback Used
 
-Once we have a trained model, we can improve it over time using Reinforcement Learning from Human Interaction (RLHI) or simplified forms of it. As users interact more with the system, the model can be updated regularly to:
+We leverage various user interactions to model engagement and intent:
 
-- Reflect shifting user preferences  
-- Improve accuracy based on live signals  
-- Adapt to new product inventory and trends
+- Click
+- Hover
+- Scroll past
+- Add to cart
+- Remove from cart
+- Purchase
+- Review after purchase
+
+These actions can be assigned implicit or learned reward values. Strong signals like purchases and reviews help correct the model, while clicks and hovers refine preferences.
+
+---
+
+## Why RLHI Works Better Than Just Fine-Tuning
+
+Supervised fine-tuning captures general trends across many users, but:
+
+- It cannot learn from individual user behavior in real time.
+- It becomes outdated as product catalogs or trends change.
+
+RLHI, on the other hand, enables dynamic, user-specific adaptation—allowing the system to evolve with every interaction.
+
+---
+
+## RLHF Pipeline Overview
+
+```
+         +---------------------+
+         | Browsing History    |
+         +----------+----------+
+                    |
+                    v
+         +---------------------+
+         | LLM (Base or SFT)   |  <-- Initial supervised model
+         +----------+----------+
+                    |
+          Generate Recommendations
+                    |
+                    v
+         +---------------------+
+         | User Feedback Logs  |  <-- Hover, click, purchase, etc.
+         +----------+----------+
+                    |
+                    v
+         +---------------------+
+         | Reward Model (optional)     |
+         +----------+----------+
+                    |
+                    v
+         +---------------------+
+         | RLHF Fine-Tuning    |  <-- PPO or DPO
+         +----------+----------+
+                    |
+                    v
+         +---------------------+
+         | Updated Recommender |
+         +---------------------+
+```
+
+---
+
+## Closing Thoughts
+
+By combining LLM reasoning with continual feedback via RLHI, we can move toward a truly adaptive, user-centric recommendation system—one that personalizes based on context, history, and evolving intent.
+
+This approach not only improves short-term accuracy but ensures long-term robustness in dynamic e-commerce environments.
