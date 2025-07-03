@@ -46,7 +46,7 @@ Instead of using ChatGPT solely as a wrapper, training a dedicated model can yie
 
 ---
 ## Background
-
+---
 There are many machine learning models available for clustering all the products and making recommendations, but in this post, I will focus on how Large Language Models (LLMs) can be used for product recommendation—particularly how we’ve adapted them for personalized suggestions based on user behavior
 ---
 ## Dataset Preparation
