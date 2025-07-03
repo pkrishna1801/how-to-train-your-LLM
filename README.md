@@ -48,17 +48,6 @@ Instead of using ChatGPT solely as a wrapper, training a dedicated model can yie
 
 There are many machine learning models available for clustering all the products and making recommendations, but in this post, I will focus on how Large Language Models (LLMs) can be used for product recommendation—particularly how we’ve adapted them for personalized suggestions based on user behavior
 
-## Dataset Preparation
-
-The quality and structure of the dataset play a critical role in building a successful recommendation system. Most existing solutions rely heavily on the structure of the data. To move forward, I have created a dataset that includes:
-
-- Product metadata  
-- Simulated browsing histories  
-- Annotated preferred recommendations (including edge cases and anomalies)
-
-This dataset mirrors the decisions made by ChatGPT in our current pipeline. The goal is to train a smaller model using this data in a teacher-student setup, where ChatGPT serves as the teacher.
-
-
 ## Alternative Training Approaches Based on Dataset
 
 There are many approaches we can take, depending on the kind of dataset we have. For example, if we have data with `user_id`, `last_viewed`, `last_add_to_cart`, and `last_purchased` items, we can fine-tune an LLM for next-product recommendation using supervised learning.
