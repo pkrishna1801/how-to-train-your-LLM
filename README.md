@@ -99,15 +99,14 @@ Such sequences can be used to fine-tune a base transformer using standard superv
 
 To personalize and adapt over time, we move beyond supervised learning. RLHI allows the model to improve using real user interactions as feedback.
 
-These interactions include:
-
-- Click
-- Hover
-- Scroll past
-- Add to cart
-- Remove from cart
-- Purchase
-- Review after purchase
+Interactions and simple Reward function looks like:
+- scroll_past           → -2.0  
+- remove_from_cart      → -1.0  
+- hover                 →  0.1  
+- click                 →  1.0  
+- add_to_cart           →  2.0  
+- review_after_purchase →  4.0  
+- purchase              →  5.0  
 
 Each action can be treated as an implicit signal of user intent. Strong signals like purchases or reviews can reinforce useful recommendations, while clicks and hovers offer fine-grained feedback.
 
@@ -121,7 +120,14 @@ Each action can be treated as an implicit signal of user intent. Strong signals 
 }
 ```
 
-Such logs can serve as reward signals for fine-tuning, allowing the model to learn user preferences in real time.
+As the model is fine-tuned using interaction-based rewards (via methods like PPO or DPO), it updates its policy to increase the likelihood of actions (recommendations) that lead to higher user engagement. Over many iterations:
+
+Reward gradients guide the model toward output distributions that maximize expected user satisfaction.
+
+The policy shifts from general patterns learned during supervised pretraining to behavior aligned with real-world feedback.
+
+Negative rewards (e.g., from scroll-past or ignored items) reduce the probability of those recommendations in similar contexts.
+
 
 ---
 
