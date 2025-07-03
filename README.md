@@ -1,8 +1,3 @@
-# How to Train Your Dragon (LLM) for Product Recommendation
-
-
-
-
 
 In this post, I explain my previous approach for building a product recommendation system using Large Language Models (LLMs), the limitations encountered, and a proposed direction for training a smaller model that can improve performance over time.
 
