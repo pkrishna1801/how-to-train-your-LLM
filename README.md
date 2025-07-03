@@ -137,7 +137,7 @@ Supervised fine-tuning captures general trends across many users, but:
 - It cannot learn from individual user behavior in real time.
 - It becomes outdated as product catalogs or trends change.
 
-RLHI, on the other hand, enables dynamic, user-specific adaptation—allowing the system to evolve with every interaction.
+On the other hand, RLHI evolve with every interaction.
 
 ---
 
